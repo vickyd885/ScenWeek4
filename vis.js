@@ -1,24 +1,29 @@
-
-
 function init() {
 	var Text, newText = [];
 	var stage = new createjs.Stage("demoCanvas");
 	var poly = new createjs.Shape();
-	readTextFile("guards.pol",function(data){
-		Text = data;
-	});
-
-	Text = Text.replace(/ /g,"").replace(/\d:/g,'H').split('H');
-	Text.shift();
-	Text.forEach( function(element, index, callback1) {
-		callback1[index] = element.replace(/\(([\d-.]+),([\d-.]+)\)/g,'$1H$2').split(',');
-		callback1[index].forEach( function(element1, index, callback2) {
-			callback2[index] = element1.split('H');
-		});
-	});
-	console.log(Text[0]);
-    addNodes(stage,Text[0]);
+    var input = getInput();
+    console.log(input);
+    addNodes(stage,input[8]);
+    //addGuardAtVertices(stage,input[0])
 	stage.update();
+}
+
+function getInput(){
+    readTextFile("guards.pol",function(data){
+        Text = data;
+    });
+
+    Text = Text.replace(/ /g,"").replace(/\d:/g,'H').split('H');
+    Text.shift();
+    Text.forEach( function(element, index, callback1) {
+        callback1[index] = element.replace(/\(([\d-.]+),([\d-.]+)\)/g,'$1H$2').split(',');
+        callback1[index].forEach( function(element1, index, callback2) {
+            callback2[index] = element1.split('H');
+        });
+    });
+    //console.log(Text[0]);
+    return Text;
 }
 
 function readTextFile(file,callback)
@@ -43,14 +48,28 @@ function addNodes(stage,ideal_list){
   var polygon = new createjs.Shape();
   polygon.graphics.beginStroke("black");
   var scaled = ideal_list.forEach(function(element,index,callback){
-    callback[index][0] = element[0];
-    callback[index][1] = element[1];
+    callback[index][0] = element[0]*100 + 400;
+    callback[index][1] = element[1]*100 + 400;
+
   });
-  polygon.graphics.beginFill("Red").drawPolygon(200,200,ideal_list);
+  polygon.graphics.beginFill("Red").moveTo(400,400).drawPolygon(200,200,ideal_list);
   //polygon.graphics.lineTo(60, 60).lineTo(30, 90).lineTo(0, 60);
   stage.addChild(polygon)
 }
 
+function addGuard(stage,x,y){
+    var circle = new createjs.Shape();
+    console.log("inserting "+x+" and "+ y);
+    circle.graphics.beginFill("DeepSkyBlue").drawCircle(x, y, 10);
+    stage.addChild(circle);
+}
+
+function addGuardAtVertices(stage,list){
+    for(var i in list){
+        console.log(list[i]);
+        addGuard(stage,list[i][0],list[i][1]);
+    }
+}
 
 // library function to draw polygon!
 (createjs.Graphics.Polygon = function(x, y, points) {
