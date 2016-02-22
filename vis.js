@@ -4,8 +4,8 @@ function init() {
 	var poly = new createjs.Shape();
     var input = getInput();
     console.log(input);
-    addNodes(stage,input[8]);
-    //addGuardAtVertices(stage,input[0])
+    addNodes(stage,input[0]);
+    addGuardAtVertices(stage,input[0])
 	stage.update();
 }
 
