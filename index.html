@@ -1,9 +1,48 @@
 <html>
  <head>
+   <link rel="stylesheet" type="text/css" href="style.css">
    <script src="https://code.createjs.com/createjs-2015.11.26.min.js"></script>
-   <script src="vis.js"></script>
+
+   <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.12.0/jquery.min.js"></script>
+   <script src="//cdnjs.cloudflare.com/ajax/libs/interact.js/1.2.6/interact.min.js"></script>
+   <script src="parse.js"></script>
  </head>
- <body onload="init();">
-   <canvas id="demoCanvas" width="3000" height="3000"></canvas>
- </body>
+ <body>
+	 <div class="buttons">
+	 	<button id="increase" type="button">Increase</button>
+	 	<button id="decrease" type="button">Decrease</button>
+	 </div>
+ 	<svg id="svgSet" class="svgborder" width="1000" height="1000" viewBox="0 0 800 800"> 
+ 		<polygon class="adjust" id="main" style="fill:lime;stroke:purple;stroke-width:0.009;"/>
+ 	</svg>
+</body>
+<script>
+document.addEventListener("DOMContentLoaded", function(event) { 
+  		renderSVG(prepString(getInput()));
+  		getCurrentWidthHeight();
+});
+
+$( "#decrease" ).click(function() {
+  var current = getCurrentWidthHeight();
+  var svg = document.getElementById('svgSet');
+  console.log(parseInt(current[3]));
+  var w = parseInt(current[2]);
+  var h = parseInt(current[3]);
+  svg.setAttribute('viewBox', '0 0 ' + parseInt(w+10) + ' ' + parseInt(h+10) );
+ 
+});
+
+$( "#increase" ).click(function() {
+  var current = getCurrentWidthHeight();
+  var svg = document.getElementById('svgSet');
+  console.log(parseInt(current[3]));
+  var w = parseInt(current[2]);
+  var h = parseInt(current[3]);
+  svg.setAttribute('viewBox', '0 0 ' + parseInt(w-10) + ' ' + parseInt(h-10) );
+});
+
+
+
+
+</script>
 </html>

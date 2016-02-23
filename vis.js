@@ -1,14 +1,27 @@
+var offsetX = 400;
+var offsetY = 400;
+
 function init() {
 	var Text, newText = [];
 	var stage = new createjs.Stage("demoCanvas");
-	var poly = new createjs.Shape();
     var input = getInput();
-    console.log(input);
-    addNodes(stage,input[0]);
-    addGuardAtVertices(stage,input[0])
+    //addNodes(stage,input[0],10,10);
+    drawMap(stage,convertToInt(input[0]));
+    console.log(input[0])
+    //addGuard(stage,110+offsetX,offsetY);
 	stage.update();
 }
 
+
+function convertToInt(array){
+    for(var i = 0; i < array.length;i++){
+        for(var j = 0; j < array[i].length;j++){
+            array[i][j] = parseInt(array[i][j],10);
+        }
+    }
+    console.log(array);
+    return array;
+}
 function getInput(){
     readTextFile("guards.pol",function(data){
         Text = data;
@@ -22,7 +35,7 @@ function getInput(){
             callback2[index] = element1.split('H');
         });
     });
-    //console.log(Text[0]);
+    console.log(Text[0]);
     return Text;
 }
 
@@ -44,15 +57,31 @@ function readTextFile(file,callback)
     rawFile.send(null);
 }
 
-function addNodes(stage,ideal_list){
+// function addNodes(stage,ideal_list,startX,startY){
+//   var polygon = new createjs.Shape();
+//   polygon.graphics.beginStroke("black");
+//   var scaled = ideal_list.forEach(function(element,index,callback){
+//     callback[index][0] = element[0] + offsetX;
+//     callback[index][1] = element[1] + offsetY;
+//   });
+//   console.log("addnodes" + startX,startY);
+
+//   polygon.graphics.beginFill("Red").drawPolygon(startX,startY,ideal_list);
+
+//   //drawPolygon(startX,startY,ideal_list).endFill();
+//   //polygon.graphics.lineTo(60, 60).lineTo(30, 90).lineTo(0, 60);
+//   stage.addChild(polygon)
+// }
+
+function drawMap(stage,list){
   var polygon = new createjs.Shape();
   polygon.graphics.beginStroke("black");
-  var scaled = ideal_list.forEach(function(element,index,callback){
+  var scaled = list.forEach(function(element,index,callback){
     callback[index][0] = element[0]*100 + 400;
     callback[index][1] = element[1]*100 + 400;
 
   });
-  polygon.graphics.beginFill("Red").moveTo(400,400).drawPolygon(200,200,ideal_list);
+  polygon.graphics.beginFill("Red").drawPolygon(list[0][0],list[0][1],list);
   //polygon.graphics.lineTo(60, 60).lineTo(30, 90).lineTo(0, 60);
   stage.addChild(polygon)
 }
@@ -60,8 +89,13 @@ function addNodes(stage,ideal_list){
 function addGuard(stage,x,y){
     var circle = new createjs.Shape();
     console.log("inserting "+x+" and "+ y);
-    circle.graphics.beginFill("DeepSkyBlue").drawCircle(x, y, 10);
+    circle.graphics.beginFill("DeepSkyBlue").drawCircle(x, y, 10).endFill();
+    setGuardView(stage,x,y);
     stage.addChild(circle);
+    stage.update();
+    console.log(circle.x,circle.y);
+
+
 }
 
 function addGuardAtVertices(stage,list){
@@ -71,6 +105,11 @@ function addGuardAtVertices(stage,list){
     }
 }
 
+function setGuardView(stage,guardX,guardY){
+    console.log("setgarud"+guardX,guardY);
+
+    addNodes(stage,[[110,0],[2,3],[3,4],[5,6],[7,8]],guardX,guardY);
+}
 // library function to draw polygon!
 (createjs.Graphics.Polygon = function(x, y, points) {
     this.x = x;
