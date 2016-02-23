@@ -1,12 +1,45 @@
+
 function init() {
-	var Text, newText = [];
-	var stage = new createjs.Stage("demoCanvas");
-	var poly = new createjs.Shape();
+
     var input = getInput();
-    console.log(input);
-    addNodes(stage,input[8]);
-    //addGuardAtVertices(stage,input[0])
-	stage.update();
+    var data = input[18 ];
+    createPolygon(data);
+}
+
+function createPolygon(points) {
+
+    var svg = d3.select("body").append("svg").attr("width", "100%").attr("height", "100%");
+
+    var xs = [];
+    var ys = [];
+
+    points.forEach( function(element, index, callback) {
+        xs.push(parseInt(element[0]));
+        ys.push(parseInt(element[1]));
+    });
+
+    console.log(xs);
+    console.log(ys);
+
+    var scaleX = d3.scale.linear()
+        .domain([d3.min(xs)-2,d3.max(xs)+2])
+        .range([0, 600]);
+
+    var scaleY = d3.scale.linear()
+        .domain([d3.min(ys)-2,d3.max(ys)+2])
+        .range([500,0]);
+
+    var coords = [];
+
+    points.forEach( function(element, index) {
+        coords.push([scaleX(element[0]),scaleY(element[1])].join(","));
+    });
+    coords = coords.join(" ");
+
+    svg.append("polygon")
+        .attr("points", coords)
+        .attr("stroke", "white")
+        .attr("stroke-width", 4);
 }
 
 function getInput(){
@@ -14,7 +47,7 @@ function getInput(){
         Text = data;
     });
 
-    Text = Text.replace(/ /g,"").replace(/\d:/g,'H').split('H');
+    Text = Text.replace(/ /g,"").replace(/[\d]+:/g,'H').split('H');
     Text.shift();
     Text.forEach( function(element, index, callback1) {
         callback1[index] = element.replace(/\(([\d-.]+),([\d-.]+)\)/g,'$1H$2').split(',');
@@ -22,7 +55,6 @@ function getInput(){
             callback2[index] = element1.split('H');
         });
     });
-    //console.log(Text[0]);
     return Text;
 }
 
@@ -44,64 +76,3 @@ function readTextFile(file,callback)
     rawFile.send(null);
 }
 
-function addNodes(stage,ideal_list){
-  var polygon = new createjs.Shape();
-  polygon.graphics.beginStroke("black");
-  var scaled = ideal_list.forEach(function(element,index,callback){
-    callback[index][0] = element[0]*100 + 400;
-    callback[index][1] = element[1]*100 + 400;
-
-  });
-  polygon.graphics.beginFill("Red").moveTo(400,400).drawPolygon(200,200,ideal_list);
-  //polygon.graphics.lineTo(60, 60).lineTo(30, 90).lineTo(0, 60);
-  stage.addChild(polygon)
-}
-
-function addGuard(stage,x,y){
-    var circle = new createjs.Shape();
-    console.log("inserting "+x+" and "+ y);
-    circle.graphics.beginFill("DeepSkyBlue").drawCircle(x, y, 10);
-    stage.addChild(circle);
-}
-
-function addGuardAtVertices(stage,list){
-    for(var i in list){
-        console.log(list[i]);
-        addGuard(stage,list[i][0],list[i][1]);
-    }
-}
-
-// library function to draw polygon!
-(createjs.Graphics.Polygon = function(x, y, points) {
-    this.x = x;
-    this.y = y;
-    this.points = points;
-}).prototype.exec = function(ctx) {
-    var start = this.points[0];
-    ctx.moveTo(start.x, start.y);
-    this.points.slice(1).forEach(function(point) {
-        ctx.lineTo(point.x, point.y);
-    });
-    ctx.lineTo(start.x, start.y);
-}
-createjs.Graphics.prototype.drawPolygon = function(x, y, args) {
-    var points = [];
-    if (Array.isArray(args)) {
-        args.forEach(function(point) {
-            point = Array.isArray(point) ? {x:point[0], y:point[1]} : point;
-            points.push(point);
-        });
-    } else {
-        args = Array.prototype.slice.call(arguments).slice(2);
-        var x = null;
-        args.forEach(function(val) {
-            if (x == null) {
-                x = val;
-            } else {
-                points.push({x: x, y: val});
-                x = null;
-            }
-        });
-    }
-    return this.append(new createjs.Graphics.Polygon(x, y, points));
-}
