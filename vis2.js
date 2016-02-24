@@ -15,14 +15,16 @@ function init() {
     // .on("mousemove", mousemoved);
     
     var input = getInput();
-    var data = input[0];
+    var data = input[3];
     data = scaleData(data);
+
+
+    tryAlgorithm();
 
     createGallery(polygonConvert(data));
     createSegments(data);
-    drawLoop();
-    addGuards();
-
+    //drawLoop();
+    //addGuards();
 }
 
 function addGuards() {
