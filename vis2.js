@@ -163,15 +163,6 @@ function addGuards() {
     });
 }
 
-// function mousemoved() {
-//     var d = d3.mouse(this);
-//     mousepos = {
-//         'x' : d[0],
-//         'y' : d[1]
-//     };
-//     updateScreen = true;
-// }
-
 window.requestAnimationFrame = window.requestAnimationFrame || window.webkitRequestAnimationFrame || window.mozRequestAnimationFrame || window.msRequestAnimationFrame;
 
 function drawLoop() {
@@ -182,103 +173,6 @@ function drawLoop() {
     }
 }
 
-// function draw() {
-
-//     svg.selectAll(".intersects").remove();
-
-//     var points = (function(segs) {
-//         var u = [];
-//         segs.forEach( function(element, index) {
-//             u.push(element.a,element.b);
-//         });
-//         return u;
-//     }) (polySegments);
-
-//     var uniquePoints = (function(points){
-//         var set = {};
-//         return points.filter(function(p) {
-//             var k = p.x + "," + p.y;
-//             if(k in set){
-//                 return false;
-//             } else {
-//                 set[k] = true;
-//                 return true;
-//             }
-//         });
-//     })(points);
-
-//     var uniqueAngles = [];
-
-//     for(i = 0; i < uniquePoints.length; i++) {
-//         var unique = uniquePoints[i];
-
-//         var angle = Math.atan2(unique.y-mousepos.y,unique.x-mousepos.x);
-//         unique.angle = angle;
-
-//         uniqueAngles.push(angle - 0.00001,angle,angle+0.00001);
-//     }
-
-//     var intersects = [];
-//     for(i = 0; i < uniqueAngles.length; i++) {
-//         var angle = uniqueAngles[i];
-//         var dx = Math.cos(angle);
-//         var dy = Math.sin(angle);
-
-//         var ray = {
-//             'a' : {
-//                 'x' : mousepos.x,
-//                 'y' : mousepos.y
-//             },
-//             'b' : {
-//                 'x' : mousepos.x + dx,
-//                 'y' : mousepos.y + dy
-//             }
-//         };
-
-//         var closestIntersect = null;
-//         for(j = 0; j < polySegments.length; j++) {
-//             var intersect = getIntersection(ray,polySegments[j]);
-//             if(!intersect) continue;
-//             if(!closestIntersect || intersect.param < closestIntersect.param) {
-//                 closestIntersect = intersect;
-//             }
-//         }
-
-//         if(!closestIntersect) continue;
-//         closestIntersect.angle = angle;
-
-//         intersects.push(closestIntersect);
-//     }
-
-//     intersects = intersects.sort(function(a,b){
-//         return a.angle - b.angle;
-//     });
-
-//     var polypoints = [];
-
-//     intersects.forEach( function(element, index) {
-//         polypoints.push([element.x,element.y].join(","));
-//     });
-//     polypoints = polypoints.join(" ");
-
-//     svg.selectAll("intersects").data([polypoints]).enter()
-//     .append("polygon").classed("intersects", true)
-//     .attr("points", polypoints)
-//     .attr("stroke", "green")
-//     .attr("fill", "green")
-//     .attr("stroke-width",1);
-
-//     // intersects.forEach( function(element, index, callback) {
-//     //     svg.append("line").classed("intersects", true)
-//     //         .attr("x1", mousepos.x)
-//     //         .attr("y1", mousepos.y)
-//     //         .attr("x2", element.x)
-//     //         .attr("y2", element.y)
-//     //         .attr("stroke", "lightgreen")
-//     //         .attr("stroke-width", 2);
-//     // });
-
-// }
 
 function createGallery(points) {
 
@@ -409,4 +303,3 @@ function getIntersection(ray, segment) {
         'param' : expr2
     };
 }
-
