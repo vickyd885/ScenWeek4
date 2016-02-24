@@ -1,7 +1,7 @@
 // Format for segments - a: Start, b: End of eachsegment
 var polySegments = [];
-var guards = [[1,0]];
-
+var guards = [[1,0.5]];
+var updateScreen = false;
 var height, width, svg;
 
 var scaleX, scaleY;
@@ -16,34 +16,11 @@ function init() {
     
     var input = getInput();
     var data = input[0];
+    data = scaleData(data);
 
-    var xs = [];
-    var ys = [];
-
-    data.forEach( function(element, index, callback) {
-        xs.push(parseInt(element[0]));
-        ys.push(parseInt(element[1]));
-    });
-
-    scaleX = d3.scale.linear()
-    .domain([d3.min(xs)-2,d3.max(xs)+2])
-    .range([0, width]);
-
-    scaleY = d3.scale.linear()
-    .domain([d3.min(ys)-2,d3.max(ys)+2])
-    .range([height,0]);
-
-    var coords = [];
-
-    data.forEach( function(element, index, callback) {
-        coords.push([scaleX(element[0]),scaleY(element[1])].join(","));
-        callback[index] = [scaleX(element[0]),scaleY(element[1])];
-    });
-    coords = coords.join(" ");
-
-    createGallery(coords);
+    createGallery(polygonConvert(data));
     createSegments(data);
-    // drawLoop();
+    drawLoop();
     addGuards();
 
 }
@@ -77,9 +54,7 @@ function addGuards() {
                 }
             });
         })(points);
-
         var uniqueAngles = [];
-
         for(i = 0; i < uniquePoints.length; i++) {
             var unique = uniquePoints[i];
 
@@ -88,8 +63,7 @@ function addGuards() {
 
             uniqueAngles.push(angle - 0.00001,angle,angle+0.00001);
         }
-
-        var intersects = [];
+            var intersects = [];
         for(i = 0; i < uniqueAngles.length; i++) {
             var angle = uniqueAngles[i];
             var dx = Math.cos(angle);
@@ -140,8 +114,8 @@ function addGuards() {
         svg.selectAll("intersects").data([polypoints]).enter()
         .append("polygon").classed("intersects", true)
         .attr("points", polypoints)
-        .attr("stroke", "lightgreen")
-        .attr("fill", "green")
+        .attr("stroke", "#70db83")
+        .attr("fill", "#70db83")
         .attr("stroke-width",1);
 
         intersects.forEach( function(element, index, callback) {
@@ -155,12 +129,60 @@ function addGuards() {
         });
 
         svg.append("circle")
-            .attr("fill", "white")
+            .attr("fill", "#F5F5F5")
             .attr("r", 5)
             .attr("cx", guard.x)
             .attr("cy", guard.y);
 
     });
+}
+
+function createGallery(points) {
+
+    svg.selectAll(".gallery").data([points]).enter()
+    .append("polygon")
+    .classed("gallery", true)
+    .attr("points", points)
+    .attr("stroke", "#db7093")
+    .attr("fill", "#db7093")
+    .attr("stroke-width", 1);
+}
+
+function scaleData(points) {
+    var xs = [];
+    var ys = [];
+
+    points.forEach( function(element, index, callback) {
+        xs.push(parseInt(element[0]));
+        ys.push(parseInt(element[1]));
+    });
+
+    scaleX = d3.scale.linear()
+    .domain([d3.min(xs)-2,d3.max(xs)+2])
+    .range([0, width]);
+
+    scaleY = d3.scale.linear()
+    .domain([d3.min(ys)-2,d3.max(ys)+2])
+    .range([height,0]);
+
+    points.forEach( function(element, index, callback) {
+        callback[index] = [scaleX(element[0]),scaleY(element[1])];
+    });
+
+    return points;
+}
+
+function polygonConvert(points) {
+    var coords = [];
+
+    points.forEach( function(element, index, callback) {
+        coords.push([element[0],element[1]].join(","));
+    });
+
+    coords = coords.join(" ");
+
+    return coords;
+
 }
 
 window.requestAnimationFrame = window.requestAnimationFrame || window.webkitRequestAnimationFrame || window.mozRequestAnimationFrame || window.msRequestAnimationFrame;
@@ -171,18 +193,6 @@ function drawLoop() {
         draw();
         updateScreen = false;
     }
-}
-
-
-function createGallery(points) {
-
-    svg.selectAll("polygon").data([points]).enter()
-    .append("polygon")
-    .classed("gallery", true)
-    .attr("points", points)
-    .attr("stroke", "#FA7291")
-    .attr("fill", "#FA7291")
-    .attr("stroke-width", 1);
 }
 
 function getInput(){
@@ -219,87 +229,3 @@ function readTextFile(file,callback)
     rawFile.send(null);
 }
 
-
-// Creates the segments for the intersection calculation
-function createSegments(data) {
-    var boundaries = [
-    {a:{x:0,y:0}, b:{x:width,y:0}},
-
-    {a:{x:width,y:0}, b:{x:width,y:height}},
-
-    {a:{x:width,y:height}, b:{x:0,y:height}},
-
-    {a:{x:0,y:height}, b:{x:0,y:0}}
-    ];
-
-    boundaries.forEach( function(element, index) {
-        polySegments.push(element);
-    });
-    data.forEach( function(element, index, callback) {
-        callback[index] = {
-            x: element[0],  
-            y: element[1]
-        };
-    });
-    for(i = 0; i < data.length; i++){
-        polySegments.push({
-            a: data[i % data.length],
-            b: data[(i + 1) % data.length]
-        });
-    }
-}
-
-function getIntersection(ray, segment) {
-
-    if(isNaN(ray.a.x) || isNaN(ray.a.y) || isNaN(ray.b.x) || isNaN(ray.b.y)) {
-        console.log(ray);
-        console.log(segment);
-        debugger;
-    }
-    if(isNaN(segment.a.x) || isNaN(segment.a.y) || isNaN(segment.b.x) || isNaN(segment.b.y)) {
-        console.log(ray);
-        console.log(segment);
-        debugger;
-    }
-
-    //  Parametric conversion (Ray)
-    var raypx = ray.a.x, raypy = ray.a.y;
-    var raydx = ray.b.x - ray.a.x, raydy = ray.b.y - ray.a.y;
-    //  Parametric conversion (segment)
-    var segpx = segment.a.x, segpy = segment.a.y;
-    var segdx = segment.b.x - segment.a.x, segdy = segment.b.y - segment.a.y;
-
-
-    var rayMagnitude = Math.sqrt(raydx * raydx + raydy * raydy);
-    var segMagnitude = Math.sqrt(segdx * segdx + segdy * segdy);
-
-
-    if ((raydx / rayMagnitude == segdx / segMagnitude) && (raydy / rayMagnitude == segdy / segMagnitude)) {
-        return null;
-    }
-
-    var expr1 = (raydx * (segpy - raypy) + raydy * (raypx - segpx)) / (segdx * raydy - segdy * raydx);
-    var expr2 = (segpx + segdx * expr1 - raypx) / raydx;
-
-    if(raydx === 0) expr2 = 1000;
-
-    if(isNaN(expr1) || isNaN(expr2)) {
-        console.log(expr1);
-        console.log(raydx);
-        debugger;   
-    }
-
-    if(expr2 < 0) {
-        return null;
-    }
-
-    if (expr1 < 0 || expr1 > 1){
-        return null;
-    }
-
-    return {
-        'x' : raypx + raydx * expr2,
-        'y' : raypy + raydy * expr2,
-        'param' : expr2
-    };
-}
