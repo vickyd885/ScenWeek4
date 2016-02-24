@@ -1,19 +1,18 @@
 // Format for segments - a: Start, b: End of eachsegment
 var polySegments = [];
 
-var height, width, path, svg, mousepos, updateScreen = true;
+var height, width, path, svg, mousepos, updateScreen = false;
 
 function init() {
-    mousepos = [width / 2, height / 2];
-    height = 500, width = 600;
-
+    height = 666.7, width = 1000;
     svg = d3.select("body")
         .append("svg")
         .attr("viewBox", "0 0 " + width + " " + height)
+        .attr("preserveAspectRatio","xMidYMid meet")
         .on("mousemove", mousemoved);
     
     var input = getInput();
-    var data = input[1];
+    var data = input[10];
 
     var xs = [];
     var ys = [];
@@ -25,11 +24,11 @@ function init() {
 
     var scaleX = d3.scale.linear()
         .domain([d3.min(xs)-2,d3.max(xs)+2])
-        .range([0, 600]);
+        .range([0, width]);
 
     var scaleY = d3.scale.linear()
         .domain([d3.min(ys)-2,d3.max(ys)+2])
-        .range([500,0]);
+        .range([height,0]);
 
     var coords = [];
 
@@ -41,7 +40,6 @@ function init() {
 
     createGallery(coords);
     createSegments(data);
-    console.log(polySegments);
     drawLoop();
 }
 
@@ -50,9 +48,11 @@ function mousemoved() {
     mousepos = {
         'x' : d[0],
         'y' : d[1]
-    }
+    };
     updateScreen = true;
 }
+
+window.requestAnimationFrame = window.requestAnimationFrame || window.webkitRequestAnimationFrame || window.mozRequestAnimationFrame || window.msRequestAnimationFrame;
 
 function drawLoop() {
     requestAnimationFrame(drawLoop);
@@ -63,13 +63,8 @@ function drawLoop() {
 }
 
 function draw() {
-    svg.selectAll(".inter").remove();
+
     svg.selectAll(".intersects").remove();
-    svg.append("circle")
-        .attr("cx", mousepos.x)
-        .attr("cy", mousepos.y)
-        .attr("r",1)
-        .classed("inter", true);
 
     var points = (function(segs) {
         var u = [];
@@ -78,9 +73,6 @@ function draw() {
         });
         return u;
     }) (polySegments);
-
-    console.log(points);
-    debugger;
 
     var uniquePoints = (function(points){
         var set = {};
@@ -95,17 +87,16 @@ function draw() {
         });
     })(points);
 
-    console.log(uniquePoints);
-    debugger;
-
     var uniqueAngles = [];
+
     for(i = 0; i < uniquePoints.length; i++) {
         var unique = uniquePoints[i];
+
         var angle = Math.atan2(unique.y-mousepos.y,unique.x-mousepos.x);
         unique.angle = angle;
+
         uniqueAngles.push(angle - 0.00001,angle,angle+0.00001);
     }
-
 
     var intersects = [];
     for(i = 0; i < uniqueAngles.length; i++) {
@@ -125,8 +116,8 @@ function draw() {
         };
 
         var closestIntersect = null;
-        for(j = 0; j < polySegments.length; i++) {
-            var intersect = getIntersection(ray,polySegments[i]);
+        for(j = 0; j < polySegments.length; j++) {
+            var intersect = getIntersection(ray,polySegments[j]);
             if(!intersect) continue;
             if(!closestIntersect || intersect.param < closestIntersect.param) {
                 closestIntersect = intersect;
@@ -137,26 +128,35 @@ function draw() {
         closestIntersect.angle = angle;
 
         intersects.push(closestIntersect);
-
     }
 
     intersects = intersects.sort(function(a,b){
         return a.angle - b.angle;
     });
 
-    console.log(intersects);
-    debugger;
-    
-    createPolygon(intersects);
-    intersects.forEach( function(element, index, callback) {
-        svg.append("line").classed("intersects", true)
-            .attr("x1", mousepos.x)
-            .attr("y1", mousepos.y)
-            .attr("x2", element.x)
-            .attr("y2", element.y)
-            .attr("stroke", "lightgreen")
-            .attr("stroke-width", 2);
+    var polypoints = [];
+
+    intersects.forEach( function(element, index) {
+        polypoints.push([element.x,element.y].join(","));
     });
+    polypoints = polypoints.join(" ");
+
+    svg.selectAll("intersects").data([polypoints]).enter()
+        .append("polygon").classed("intersects", true)
+        .attr("points", polypoints)
+        .attr("stroke", "green")
+        .attr("fill", "green")
+        .attr("stroke-width",1);
+
+    // intersects.forEach( function(element, index, callback) {
+    //     svg.append("line").classed("intersects", true)
+    //         .attr("x1", mousepos.x)
+    //         .attr("y1", mousepos.y)
+    //         .attr("x2", element.x)
+    //         .attr("y2", element.y)
+    //         .attr("stroke", "lightgreen")
+    //         .attr("stroke-width", 2);
+    // });
 
 }
 
@@ -169,21 +169,6 @@ function createGallery(points) {
         .attr("stroke", "#FA7291")
         .attr("fill", "#FA7291")
         .attr("stroke-width", 1);
-}
-
-function createPolygon(points) {
-
-    points.forEach( function(element, index, callback) {
-        callback[index] = [element.x,element.y].join(",");
-    });
-    points = points.join(" ");
-
-    svg.selectAll("intersects").data([points]).enter()
-        .append("polygon").classed("intersects", true)
-        .attr("points", points)
-        .attr("stroke", "green")
-        .attr("fill", "green")
-        .attr("stroke-width",1);
 }
 
 function getInput(){
@@ -224,13 +209,13 @@ function readTextFile(file,callback)
 // Creates the segments for the intersection calculation
 function createSegments(data) {
     var boundaries = [
-        {a:{x:0,y:0}, b:{x:600,y:0}},
+        {a:{x:0,y:0}, b:{x:width,y:0}},
 
-        {a:{x:600,y:0}, b:{x:600,y:500}},
+        {a:{x:width,y:0}, b:{x:width,y:height}},
 
-        {a:{x:600,y:500}, b:{x:0,y:500}},
+        {a:{x:width,y:height}, b:{x:0,y:height}},
 
-        {a:{x:0,y:500}, b:{x:0,y:0}}
+        {a:{x:0,y:height}, b:{x:0,y:0}}
     ];
 
     boundaries.forEach( function(element, index) {
@@ -242,7 +227,7 @@ function createSegments(data) {
             y: element[1]
         };
     });
-    for(i = 0; i <= data.length; i++){
+    for(i = 0; i < data.length; i++){
         polySegments.push({
             a: data[i % data.length],
             b: data[(i + 1) % data.length]
@@ -252,19 +237,18 @@ function createSegments(data) {
 
 function getIntersection(ray, segment) {
 
-    console.log(ray);
-    console.log(segment);
-    debugger;
     //  Parametric conversion (Ray)
     var raypx = ray.a.x, raypy = ray.a.y;
     var raydx = ray.b.x - ray.a.x, raydy = ray.b.y - ray.a.y;
-
     //  Parametric conversion (segment)
     var segpx = segment.a.x, segpy = segment.a.y;
     var segdx = segment.b.x - segment.a.x, segdy = segment.b.y - segment.a.y;
 
+
     var rayMagnitude = Math.sqrt(raydx * raydx + raydy * raydy);
     var segMagnitude = Math.sqrt(segdx * segdx + segdy * segdy);
+
+
     if ((raydx / rayMagnitude == segdx / segMagnitude) && (raydy / rayMagnitude == segdy / segMagnitude)) {
         return null;
     }
@@ -272,16 +256,18 @@ function getIntersection(ray, segment) {
     var expr1 = (raydx * (segpy - raypy) + raydy * (raypx - segpx)) / (segdx * raydy - segdy * raydx);
     var expr2 = (segpx + segdx * expr1 - raypx) / raydx;
 
-    if(expr1 < 0) {
+    if(expr2 < 0) {
         return null;
-    } else if (expr2 < 0 || expr2 > 1){
+    }
+
+    if (expr1 < 0 || expr1 > 1){
         return null;
     }
 
     return {
-        'x' : raypx + raydx * expr1,
-        'y' : raypy + raydy * expr1,
-        'expr' : expr1
+        'x' : raypx + raydx * expr2,
+        'y' : raypy + raydy * expr2,
+        'param' : expr2
     };
 }
 
