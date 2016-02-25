@@ -92,6 +92,8 @@ function findNewNode(setA,setB){
 	}
 }
 
+
+
 function checkForAdjacentNodes(nodes,pair,currentNode,index){
 	var colours = ['red','yellow','blue'];
 	var matchingColour;
@@ -175,6 +177,12 @@ function countColours(){
 	if(least == yellow) return 'yellow';
 
 }
+function uniq(a) {
+    var seen = {};
+    return a.filter(function(item) {
+        return seen.hasOwnProperty(item) ? false : (seen[item] = true);
+    });
+}
 
 function getListOfGuards(bestColour){
 	list = [];
@@ -185,13 +193,14 @@ function getListOfGuards(bestColour){
 				console.log("solutions", visitedNodes[i][j][0], bestColour);
 				if(!isInList(visitedNodes[i][j][0],list)){
 				 console.log(visitedNodes[i][j][0]);
-				 list.push(visitedNodes[i][j][0][0]);
+				 list.push(visitedNodes[i][j][0]);
+				 //guards.push(visitedNodes[i][j][0]);
 				 console.log(list);
 				}
 			}
 		}
 	}
-	console.log("final answer ", list);
+	console.log("final answer ", uniq(list));
 }
 
 function isInList(item,list){

@@ -1,6 +1,6 @@
 // Format for segments - a: Start, b: End of eachsegment
 var polySegments = [];
-var guards = [[5,0]];
+var guards = [[2,0]];
 var updateScreen = false;
 var height, width, svg;
 
@@ -24,7 +24,7 @@ function init() {
 
 
     //drawLoop();
-    //addGuards();
+    addGuards();
 }
 
 function addGuards() {
