@@ -1,8 +1,10 @@
 // Format for segments - a: Start, b: End of eachsegment
 var polySegments = [];
-var guards = [[1,0.5]];
+var guards = [[5,0]];
 var updateScreen = false;
 var height, width, svg;
+
+var actualInput = [];
 
 var scaleX, scaleY;
 
@@ -13,16 +15,16 @@ function init() {
     .attr("viewBox", "0 0 " + width + " " + height)
     .attr("preserveAspectRatio","xMidYMid meet");
     // .on("mousemove", mousemoved);
-    
     var input = getInput();
-    var data = input[3];
-    data = scaleData(data);
+    var data = input[1];
+    console.log(data);
+   
+    actualInput = data;
 
 
     tryAlgorithm();
 
-    createGallery(polygonConvert(data));
-    createSegments(data);
+
     //drawLoop();
     //addGuards();
 }
