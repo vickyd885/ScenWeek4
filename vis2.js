@@ -1,10 +1,13 @@
 // Format for segments - a: Start, b: End of eachsegment
 var polySegments = [];
-var guards = [[1,0.5]];
+var boundaries = [];
+
+var guards = [[1,0]];
 var updateScreen = false;
 var height, width, svg;
 
 var scaleX, scaleY;
+
 
 function init() {
     height = 666.7, width = 1000;
@@ -15,17 +18,29 @@ function init() {
     // .on("mousemove", mousemoved);
     
     var input = getInput();
-    var data = input[0];
+    var data = input[4];
     data = scaleData(data);
 
+    createBoundaries(height, width);
     createGallery(polygonConvert(data));
     createSegments(data);
     drawLoop();
-    addGuards();
-
+    addGuards(data);
 }
 
-function addGuards() {
+function createBoundaries(height, width) {
+    boundaries = [
+        {a:{x:0,y:0}, b:{x:width,y:0}},
+
+        {a:{x:width,y:0}, b:{x:width,y:height}},
+
+        {a:{x:width,y:height}, b:{x:0,y:height}},
+
+        {a:{x:0,y:height}, b:{x:0,y:0}}
+    ];
+}
+
+function addGuards(data) {
 
     guards.forEach( function(item, index) {
 
@@ -34,6 +49,9 @@ function addGuards() {
             'y' : scaleY(item[1])
         };
 
+        var lineSegs = onSegment(polySegments,guard.x,guard.y);
+        var inPoly = pointInPolygon(data,guard.x,guard.y);
+
         var points = (function(segs) {
             var u = [];
             segs.forEach( function(element, index) {
@@ -41,7 +59,6 @@ function addGuards() {
             });
             return u;
         }) (polySegments);
-
         var uniquePoints = (function(points){
             var set = {};
             return points.filter(function(p) {
@@ -57,13 +74,13 @@ function addGuards() {
         var uniqueAngles = [];
         for(i = 0; i < uniquePoints.length; i++) {
             var unique = uniquePoints[i];
-
             var angle = Math.atan2(unique.y-guard.y,unique.x-guard.x);
             unique.angle = angle;
 
             uniqueAngles.push(angle - 0.00001,angle,angle+0.00001);
         }
-            var intersects = [];
+
+        var intersects = [];
         for(i = 0; i < uniqueAngles.length; i++) {
             var angle = uniqueAngles[i];
             var dx = Math.cos(angle);
@@ -79,9 +96,15 @@ function addGuards() {
                     'y' : guard.y + dy
                 }
             };
-
             var closestIntersect = null;
             for(j = 0; j < polySegments.length; j++) {
+                var foundSeg = false;
+                if(lineSegs.length > 0) {
+                    lineSegs.forEach(function(element, index) {
+                        if(polySegments[j] == element) foundSeg = true;
+                    });
+                }
+                if(foundSeg) continue;
                 var intersect = getIntersection(ray,polySegments[j]);
                 if(!intersect) continue;
                 if(!closestIntersect || intersect.param < closestIntersect.param) {
@@ -102,11 +125,7 @@ function addGuards() {
         var polypoints = [];
 
         intersects.forEach( function(element, index) {
-            if(isNaN(element.x) || isNaN(element.y)) {
-                console.log(index);
-                console.log(element);
-                debugger;
-            }
+
             polypoints.push([element.x,element.y].join(","));
         });
         polypoints = polypoints.join(" ");
@@ -117,16 +136,17 @@ function addGuards() {
         .attr("stroke", "#70db83")
         .attr("fill", "#70db83")
         .attr("stroke-width",1);
+        
 
-        intersects.forEach( function(element, index, callback) {
-            svg.append("line").classed("intersects", true)
-                .attr("x1", guard.x)
-                .attr("y1", guard.y)
-                .attr("x2", element.x)
-                .attr("y2", element.y)
-                .attr("stroke", "lightgreen")
-                .attr("stroke-width", 2);
-        });
+        // intersects.forEach( function(element, index, callback) {
+        //     svg.append("line").classed("intersects", true)
+        //         .attr("x1", guard.x)
+        //         .attr("y1", guard.y)
+        //         .attr("x2", element.x)
+        //         .attr("y2", element.y)
+        //         .attr("stroke", "lightgreen")
+        //         .attr("stroke-width", 2);
+        // });
 
         svg.append("circle")
             .attr("fill", "#F5F5F5")
