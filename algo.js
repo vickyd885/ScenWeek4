@@ -67,10 +67,21 @@ function targetNewNode(nodes){
 		//console.log("here");
 		console.log(nodes[0],nodes[1]);
 		//console.log("considering",nodes[currentNode][2][0],nodes[(currentNode+1)][0][0]);
-		var matchingIndexes = findNewNode(nodes[currentNode],nodes[(currentNode+1)]);
-			//console.log("found the next node");
+		// var matchingIndexes = findNewNode(nodes[currentNode],nodes[(currentNode+1)]);
+		var localCount;
+		var matchingIndexes;
+		while(matchingIndexes != null){
+			var localCount = currentNode;
+			matchingIndexes = findNewNode(nodes[localCount],nodes[(localCount+1)]);
+			localCount++;
+		}
+
+		currentNode = localCount;
+
 		var possibleColours = checkForAdjacentNodes(nodes,nodes[(currentNode+1)][matchingIndexes[1]][0],(currentNode+1),matchingIndexes[1]);
 			//console.log(nodes[1][0][1]); 
+		
+
 		assignColour(possibleColours,nodes,(currentNode+1),matchingIndexes[1]);
 		console.log(nodes);
 		visitedNodes.push(nodes[(currentNode+1)]);
@@ -79,6 +90,7 @@ function targetNewNode(nodes){
 		totalNumberOfNodes -=1;
 	}
 }
+
 
 function findNewNode(setA,setB){
 	console.log(setA,setB);
@@ -238,7 +250,7 @@ function tryAlgorithm(){
 
 
 	
-	makeGraph(triangluationCoordinates);
+	//makeGraph(triangluationCoordinates);
 	// //var dataSet = polygonConvert(triangluationCoordinates);
 	// //svg.append("polygon").attr("points",dataSet).attr("fill","black").attr("stroke-width",1);
 	// //svg.append("polygon").attr("points",'10,0 0,50, 60,60, 70,10').attr("fill","black").attr("stroke-width",1);
