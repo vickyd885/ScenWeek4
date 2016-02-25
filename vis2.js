@@ -20,8 +20,6 @@ function init() {
     console.log(data);
    
     actualInput = data;
-
-
     tryAlgorithm();
 
 
