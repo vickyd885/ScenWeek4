@@ -42,9 +42,6 @@ function getIntersection(ray, segment) {
 
 function createSegments(data) {
 
-    boundaries.forEach(function (element, index) {
-        polySegments.push(element);
-    });
     data.forEach(function (element, index, callback) {
         callback[index] = {
             x: element[0],
@@ -163,4 +160,10 @@ function onSegment(segments, gx, gy) {
     });
     return lineSegments;
 
+}
+
+function isCollinear(x1,y1,x2,y2,x3,y3) {
+    var area = (x1 * (y2 - y3) + x2 * (y3 - y1) + x3 * (y1 - y2));
+    if(area !== 0) return false;
+    return true;
 }
