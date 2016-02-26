@@ -1,8 +1,3 @@
-var triangles = earcut([10,0, 0,50, 60,60, 70,10]); // returns [1,0,3, 3,2,1]
-
-console.log(triangles)
-
-
 
 // Triangulation library 
 function earcut(data, holeIndices, dim) {

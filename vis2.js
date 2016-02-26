@@ -2,7 +2,7 @@
 var polySegments = [];
 var boundaries = [];
 
-var guards = [[2,0]];
+var guards = [[1.5,1]];
 var updateScreen = false;
 var height, width, svg;
 
@@ -19,14 +19,18 @@ function init() {
     // .on("mousemove", mousemoved);
     
     var input = getInput();
-    var data = input[18];
+    var data = input[5];
+    //var data = input[1];
     actualInput = data;
-    //data = scaleData(data);
+    console.log(actualInput);
+    testNewLibrary();
+    data = scaleData(data);
 
     createBoundaries(height, width);
-    //createGallery(polygonConvert(data));
+    createGallery(polygonConvert(data));
     //createSegments(data);
-    tryAlgorithm();
+    //tryAlgorithm();
+   
     drawLoop();
     //addGuards(data);
 }

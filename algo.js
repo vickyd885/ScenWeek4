@@ -4,6 +4,7 @@
 //var input = [5, 0, 2, 0.5, 0, 5, 0.2, 3, -2, -2, -0.5, 0]; // case 5
 // '0,50 10,0 70,10'
 var visitedNodes = [];
+var expectedNodes; 
 function scaleArray(array){
 	for(var i = 0; i < array.length;i++)
 		array[i] = array[i]*10;
@@ -54,41 +55,136 @@ function makeGraph(nodes){ // each array has n polygons which has 3 arrays, cons
 	nodes[currentNode][0][1] = 'red';
 	nodes[currentNode][1][1] = 'yellow';
 	nodes[currentNode][2][1] = 'blue';
-	visitedNodes.push(nodes[currentNode]);
-	console.log(nodes[0][2][1]);
+	nodes[currentNode][0][2] = true;
+	nodes[currentNode][1][2] = true;
+	nodes[currentNode][2][2] = true;
+	visitedNodes.push(nodes[currentNode][0]);
+	visitedNodes.push(nodes[currentNode][1]);
+	visitedNodes.push(nodes[currentNode][2]);
+	console.log(nodes[0]);
 	//
-	targetNewNode(nodes);
+	//targetNewNode(nodes);
+	//funTraverse(nodes);
+	traverseGraph(nodes);
 }
 
-function targetNewNode(nodes){
+function checkForUniqueNodes(){
+
+}
+
+
+function funTraverse(nodes){
+	var i = 0;
+	while(i != nodes.length){
+		//console.log(nodes[i]);
+		i++;
+	}
+}
+
+
+function traverseGraph(nodes){
 	var currentNode = 0;
+	var count = 0;
 	var totalNumberOfNodes = nodes.length;
-	while(totalNumberOfNodes != 1){
-		//console.log("here");
-		console.log(nodes[0],nodes[1]);
-		//console.log("considering",nodes[currentNode][2][0],nodes[(currentNode+1)][0][0]);
-		// var matchingIndexes = findNewNode(nodes[currentNode],nodes[(currentNode+1)]);
-		var localCount;
-		var matchingIndexes;
-		while(matchingIndexes != null){
-			var localCount = currentNode;
-			matchingIndexes = findNewNode(nodes[localCount],nodes[(localCount+1)]);
-			localCount++;
+	while(visitedNodes.length < expectedNodes){
+		console.log(visitedNodes.length);
+
+		var indexOfNextNode = findNextNode(nodes[currentNode],nodes); // returns i,j of nodes[i][j]
+		
+		if(indexOfNextNode == -1){
+			console.log("check", visitedNodes.length, expectedNodes, nodes[currentNode]);
+			console.log("chekcback",visitedNodes,nodes);
+			break;
 		}
 
-		currentNode = localCount;
+		nodes[indexOfNextNode[0]][indexOfNextNode[1]][2] = true;
 
-		var possibleColours = checkForAdjacentNodes(nodes,nodes[(currentNode+1)][matchingIndexes[1]][0],(currentNode+1),matchingIndexes[1]);
-			//console.log(nodes[1][0][1]); 
+		console.log(nodes[indexOfNextNode[0]]);
+
+		var possibleColours = checkForAdjacentNodes( nodes, nodes[indexOfNextNode[0]] );
+
+		if(possibleColours.length == 0){
+			nodes[indexOfNextNode[0]][indexOfNextNode[1]][1] = possibleColours[0];
+		}else{
+			assignColour(possibleColours,nodes[indexOfNextNode[0]]);
+		}
 		
 
-		assignColour(possibleColours,nodes,(currentNode+1),matchingIndexes[1]);
 		console.log(nodes);
-		visitedNodes.push(nodes[(currentNode+1)]);
+		//visitedNodes.push(nodes[indexOfNextNode[0]][indexOfNextNode[1]]);
 
-		currentNode++;
-		totalNumberOfNodes -=1;
+		console.log(visitedNodes);
+		//visitedNodes.push(nodes[indexOfNextNode]);
+		currentNode = indexOfNextNode[0];
+		count += 1;
+	// 	break;
 	}
+	console.log(count);
+	
+
+}
+
+
+function checkIfAllNodesAreVisited(nodes){
+	var count = 0;
+	for(var i = 0 ; i < nodes.length ; i++){
+		for(var j = 0; j < nodes[i].length ; j++){
+			//console.log(nodes[i][j][2]);
+			if(nodes[i][j][2] == true)
+				count++;
+		}
+	}
+	console.log("counted",count);
+	return count;
+}
+function findNextNode(node, nodes){
+	console.log(node);
+	var lastUnvisitedI = 10, lastUnvisitedJ = 10;
+	console.log(lastUnvisitedI,lastUnvisitedJ);
+	for(var i = 0 ; i < nodes.length ;i++){
+		for(var j = 0; j < nodes[i].length;j++){
+			//console.log(nodes[i][j][0]);
+			if(nodes[i][j][2] == false){
+				lastUnvisitedJ = j;
+				lastUnvisitedI = i;
+			}
+			for(var k = 0 ; k < node.length ; k++){
+				console.log("comparing", node[k][0], "with",nodes[i][j][0]);
+				if( node[k][0][0] == nodes[i][j][0][0] && node[k][0][1] ==  nodes[i][j][0][1]){
+					console.log("found a match that has been ", nodes[i][j][2]);
+					if(!nodes[i][j][2] ){ 
+						console.log("found a match",nodes[i][j][0][0] , nodes[i][j][0][1], nodes[i][j][1]);
+						visitedNodes.push(nodes[i][j][0]);
+						return [i,j]
+					}else{
+					//so the case where it finds the same node which it visits but no other nodes are available, pick the last available node
+					if(nodes[i][j][2] == true){
+						return [lastUnvisitedI,lastUnvisitedJ]
+					}
+					}
+				}
+			}
+		}
+		console.log("something went wrong");
+	}
+
+
+	function findUnvisitedNode(nodes){
+
+	}
+	// for(var i = 0 ; i < node.length ;i++){
+	// 	for(var j = 0; j < nodes.length;j++){
+	// 		//console.log(nodes[i][j][0]);
+	// 		for(var k = 0 ; k < nodes[j].length ; k++){
+	// 			console.log(node[k][0],nodes[i][j][0]);
+	// 			if( node[i][0][0] == nodes[j][k][0][0] && node[i][0][1] ==  nodes[j][k][0][1] && !nodes[k][k][2] ){
+	// 				console.log("found a match",nodes[i][j][0][0] ,nodes[i][j][0][1] );
+	// 				return [i,j]
+	// 			}
+	// 		}
+	// 	}
+	// }
+	return -1;
 }
 
 
@@ -96,7 +192,7 @@ function findNewNode(setA,setB){
 	console.log(setA,setB);
 	for(var i = 0; i < setA.length;i++){
 		for(var j = 0; j < setA[i][0].length;j++){
-			console.log(setA[i][j],setB[i][j]);
+			console.log(setA[i][j],setB[i][j],"for ", i ,j);
 			if( checkIfNodesAreAdjacent( setA[i][0] , setB[j][0] )){
 			 	return [i,j]
 			}
@@ -106,21 +202,27 @@ function findNewNode(setA,setB){
 
 
 
-function checkForAdjacentNodes(nodes,pair,currentNode,index){
+function checkForAdjacentNodes(nodes, triangles){
 	var colours = ['red','yellow','blue'];
-	var matchingColour;
-	console.log(visitedNodes);
+	console.log(triangles);
+	// var matchingColour;
+
 	for(var i = 0; i < visitedNodes.length;i++){
 		for(var j = 0; j < visitedNodes[i].length;j++){
-			console.log(visitedNodes[i][j]);
-			if(pair[0] == visitedNodes[i][j][0][0] && pair[1] == visitedNodes[i][j][0][1]){
-				console.log("found matching pair with the colour",visitedNodes[i][j][1]);
+			//console.log(visitedNodes[i][j]);
+			for(var k = 0; k < triangles.length;k++){
+				//console.log(triangles[k][0]);
+				pair = triangles[k][0];
 
-				console.log(nodes[(currentNode)][index][1]);
-				nodes[(currentNode)][index][1] = visitedNodes[i][j][1];
-				console.log("After assginment",nodes[(currentNode)][index][1]);
-				removeItem(colours,visitedNodes[i][j][1]);
+				console.log(visitedNodes[i][0], i, j ,k);
+
+				if(pair[0] == visitedNodes[i][0][0] && pair[1] == visitedNodes[i][0][1]){
+					console.log("found matching pair with the colour",visitedNodes[i][1]); 
+					triangles[k][1] = visitedNodes[i][1];
+					removeItem(colours,visitedNodes[i][1]);
 				//assignColour(node,visitedNodes[i][j][1]);
+				}
+
 			}
 		}
 	}
@@ -129,7 +231,7 @@ function checkForAdjacentNodes(nodes,pair,currentNode,index){
 }
 
 
-function assignColour(colours,nodes,currentNode,link){
+function assignColour(colours,triangle){
 	//var nodes[currentNode][link][0] = 
 	if(colours.length == 0){
 		console.log(colours[0]);
@@ -137,14 +239,23 @@ function assignColour(colours,nodes,currentNode,link){
 	}
 	else {
 		// in the case that there is more!
-		console.log("colours to choose from", colours,nodes);
-			for(var j = 0; j < nodes[currentNode].length;j++){
-				console.log(nodes[currentNode][j][0],nodes[currentNode][j][1]);
-				if(nodes[currentNode][j][1] == null){
-					nodes[currentNode][j][1] = colours[(colours.length-1)];
-					colours.pop();
-				}
+		console.log("colours to choose from", colours,triangle);
+
+		for(var i = 0; i< triangle.length; i++){
+			console.log(triangle[i]);
+			if(triangle[i][1] == null){
+				triangle[i][1] = colours[(colours.length-1)];
+				colours.pop();
 			}
+		}
+
+			// for(var j = 0; j < triangles.length;j++){
+			// 	console.log(nodes[currentNode][j][0],nodes[currentNode][j][1]);
+			// 	if(nodes[currentNode][j][1] == null){
+			// 		nodes[currentNode][j][1] = colours[(colours.length-1)];
+			// 		colours.pop();
+			// 	}
+			// }
 	}
 	console.log("remaining colours",colours);
 	//console.log(nodes);
@@ -171,16 +282,15 @@ function checkIfNodesAreAdjacent(pairA,pairB){
 function countColours(){
 	var red = 0, blue = 0, yellow = 0 ;
 	for(var i = 0 ; i < visitedNodes.length; i++){
-		for(var j = 0; j < visitedNodes[i].length;j++){
-			//console.log(visitedNodes[i][j][1]);
-			if(visitedNodes[i][j][1] == 'red')
+			console.log(visitedNodes[i][1]);
+			if(visitedNodes[i][1] == 'red')
 				red++;
-			if(visitedNodes[i][j][1] == 'yellow')
+			if(visitedNodes[i][1] == 'yellow')
 				yellow++;
-			if(visitedNodes[i][j][1] == 'blue')
+			if(visitedNodes[i][1] == 'blue')
 				blue++;
-		}
 	}
+
 	var list = [red,blue,yellow];
 	var least = Math.min.apply(Math,list);
 	console.log("least is", least);
@@ -200,17 +310,15 @@ function getListOfGuards(bestColour){
 	list = [];
 	console.log(visitedNodes);
 	for(var i = 0; i < visitedNodes.length; i++){
-		for(var j = 0; j < visitedNodes[i].length; j++){
-			if(visitedNodes[i][j][1] == bestColour){
-				console.log("solutions", visitedNodes[i][j][0], bestColour);
-				if(!isInList(visitedNodes[i][j][0],list)){
-				 console.log(visitedNodes[i][j][0]);
-				 list.push(visitedNodes[i][j][0]);
+			if(visitedNodes[i][1] == bestColour){
+				console.log("solutions", visitedNodes[i][0], bestColour);
+				if(!isInList(visitedNodes[i][0],list)){
+				 console.log(visitedNodes[i][0]);
+				 list.push(visitedNodes[i][0]);
 				 //guards.push(visitedNodes[i][j][0]);
 				 console.log(list);
 				}
 			}
-		}
 	}
 	console.log("final answer ", uniq(list));
 }
@@ -223,11 +331,12 @@ function isInList(item,list){
 	}
 	return false;
 }
+
 function scaleDataAfterTriangulation(array){
 	var safe = [];
 	for(var i = 0 ; i<array.length;i++){
 		for(var j = 0; j < array[i].length;j++){
-			//console.log(array[i][j]);
+			//console.log(array[i][j][0]);
 			safe.push([ array[i][j][0][0].toString(),array[i][j][0][1].toString()]);
 		}
 	}
@@ -240,7 +349,7 @@ function tryAlgorithm(){
 	var input = prepStringForTriangulation(actualInput);
 
 	var triangulationPoints = earcut(input); // pass the input to the library to triangulation points 
-	//console.log(triangulationPoints); 
+	console.log(triangulationPoints); 
 	var triangluationCoordinates = getTriangulationPoints(input,triangulationPoints); // get the cordinates of the triangulation points
 	//console.log(triangluationCoordinates[0],triangluationCoordinates[1]);
 	//console.log(polygonConvert(scaleDataAfterTriangulation(triangluationCoordinates)));
@@ -250,20 +359,20 @@ function tryAlgorithm(){
 
 
 	
-	//makeGraph(triangluationCoordinates);
+	makeGraph(triangluationCoordinates);
 	// //var dataSet = polygonConvert(triangluationCoordinates);
 	// //svg.append("polygon").attr("points",dataSet).attr("fill","black").attr("stroke-width",1);
 	// //svg.append("polygon").attr("points",'10,0 0,50, 60,60, 70,10').attr("fill","black").attr("stroke-width",1);
 
 
-	console.log("after graph traversal",visitedNodes);
-	countColours();
+	//console.log("after graph traversal",visitedNodes);
+	//countColours();
 	// actualInput = scaleData(actualInput);
 	// console.log(polygonConvert(actualInput));
 	// createGallery(polygonConvert(actualInput));
  //    //createSegments(actualInput);
-	getListOfGuards(countColours());
-	drawGraphs(actualInput,triangluationCoordinates);
+	//getListOfGuards(countColours());
+	//drawGraphs(actualInput,[]);
 }
 
 function prepStringForTriangulation(rawString){
@@ -281,24 +390,108 @@ function prepStringForTriangulation(rawString){
 }
 
 function drawTriangulationPolygon(string){
-	svg.append("polygon").attr("points",polygonConvert(scaleDataAfterTriangulation(triangles))).attr("fill","rgba(255, 204, 204,0.3)").attr("stroke-width",1).attr("stroke","blue");
+	//svg.append("polygon").attr("points",polygonConvert(scaleDataAfterTriangulation(triangles))).attr("fill","rgba(255, 204, 204,0.3)").attr("stroke-width",1).attr("stroke","blue");
+	console.log(string);
 	string = string.split(' ')
 	console.log(string);
+
+
+	for(var i = 0; i< string.length;i++){
+		if(string[i]==''){
+			console.log("wierd")
+			string.splice(i);
+		}
+	}
+	console.log(string.length);
+	//return; 
 	var i = 0;
+
 	while(i!=string.length){
 		var localString = string[i] + ' ' + string[(i+1)] + ' ' + string[(i+2)];
-		console.log(localString);
+		//console.log(localString);
 		i+=3;
 		svg.append("polygon").attr("points",localString).attr("fill","rgba(255, 204, 204,0.3)").attr("stroke-width",1).attr("stroke","blue");
 	}
 }
+
 function drawGraphs(polygon,triangles){
-	
 	actualInput = scaleData(actualInput);
-	
 	console.log(polygonConvert(actualInput));
 	createGallery(polygonConvert(actualInput));
-	svg.append("polygon").attr("points",polygonConvert(scaleDataAfterTriangulation(triangles))).attr("fill","rgba(255, 204, 204,0.3)").attr("stroke-width",1).attr("stroke","blue");
+
+
+	//svg.append("polygon").attr("points",polygonConvert(scaleDataAfterTriangulation(triangles))).attr("fill","rgba(255, 204, 204,0.3)").attr("stroke-width",1).attr("stroke","blue");
 	drawTriangulationPolygon(polygonConvert(scaleDataAfterTriangulation(triangles)));
  // //createSegments(actualInput);
+}
+
+// Insert points into objects, 
+
+// Extract + draw; 
+
+
+function createObject(){
+	console.log(actualInput);
+	expectedNodes = actualInput.length;
+	var contour = []
+	for(var i =0; i < actualInput.length;i++){
+		for(var j = 0 ;j < (actualInput[i].length-1);j++){ // dont include last point
+			contour.push(new poly2tri.Point( actualInput[i][0], actualInput[i][1]));
+		}
+	}
+	var swctx = new poly2tri.SweepContext(contour);
+	swctx.triangulate();
+	var triangles = swctx.getTriangles();
+	return triangles;
+}
+
+function getScaledList(triangles){
+	console.log(triangles);
+	string = [];
+	console.log(triangles[1]['points_']);
+	for(j=0;j<triangles.length;j++){
+		var points = triangles[j]['points_'];
+		var y = 0;
+		while(y!= points.length){
+			//string += points[i]['x'] + ',' + points[i]['y'] + ' ';
+			//string.push([points[i]['x'],points[i]['y']]);
+			var local = [];
+			for(var i = 0; i < points.length ; i++){
+				console.log(points[0]['x']);
+				console.log(points[1]['y']);
+				//string += points[i]['x'] + ',' + points[i]['y'] + ' ';
+				local.push([[points[i]['x'],points[i]['y']],null,false]);
+			}
+			string.push(local);
+			y += 3;
+		}
+	}
+	console.log(string);
+	return string;
+}
+
+function pipeString(triangles){
+	string = '';
+
+	for(var i = 0; i < triangles.length ; i++){
+		for(var j = 0; j < triangles[i].length;j++){
+			console.log(triangles[i][j]);
+			string += triangles[i][0] +','+triangles[i][1]+' '
+		}
+		//string += points[i]['x'] + ',' + points[i]['y'] + ' ';
+		//string.push([points[i]['x'],points[i]['y']]);
+	}
+	console.log(string);
+	return string;
+}
+
+function testNewLibrary(){
+	var tri = createObject();
+	var triangluationCoordinates = getScaledList(tri);
+	drawGraphs(actualInput,triangluationCoordinates);
+	//console.log(p);
+	makeGraph(triangluationCoordinates);
+	countColours();
+	getListOfGuards(countColours());
+
 }
